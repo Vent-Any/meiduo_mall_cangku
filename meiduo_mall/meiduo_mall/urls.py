@@ -21,6 +21,7 @@ import logging
 # 根据配置信息,创建日志器
 from django.http import HttpResponse
 
+
 def test(request):
     logger = logging.getLogger('django')
     # 记录日志
@@ -32,14 +33,19 @@ def test(request):
     logger.info('123')
     return HttpResponse('test')
 
+
 # 注册我们的转换器
-from utils.converters import UsernameConverter
+from utils.converters import *
+
 # 参数1 转换器类
 # 参数2 起别名
 register_converter(UsernameConverter, 'uc')
+register_converter(MobileConverter, 'mb')
+register_converter(UUIDConverter, 'uuid')
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     path('test/', test),
-    path('', include('apps.users.urls'))
+    path('', include('apps.users.urls')),
+    path('', include('apps.verifications.urls'))
 ]

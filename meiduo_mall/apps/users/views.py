@@ -21,6 +21,18 @@ class UsernameCountView(View):
         # 根据username 进行数量的查询.
         count = User.objects.filter(username=username).count()
         # 将结果进行返回.
+        return JsonResponse({'code': 400, 'errmsg': 'OK', 'count': count})
+
+class MobileCountView(View):
+    """判断手机号是否重复注册"""
+
+    def get(self, request, mobile):
+        """
+        :param request: 请求对象
+        :param mobile: 手机号
+        :return: JSON
+        """
+        count = User.objects.filter(mobile=mobile).count()
         return JsonResponse({'code': 0, 'errmsg': 'OK', 'count': count})
 
 
