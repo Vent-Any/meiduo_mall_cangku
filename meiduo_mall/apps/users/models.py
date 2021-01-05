@@ -12,6 +12,7 @@ class User(AbstractUser):
     """自定义用户模型类"""
     mobile = models.CharField(max_length=11, unique=True, verbose_name='手机号')
 
+
     class Meta:
         db_table = 'tb_users'
         verbose_name = '用户'     # admin 后台使用.

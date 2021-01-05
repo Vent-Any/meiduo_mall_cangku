@@ -25,6 +25,7 @@ class UsernameCountView(View):
         # 将结果进行返回.
         return JsonResponse({'code': 400, 'errmsg': 'OK', 'count': count})
 
+
 class MobileCountView(View):
     """判断手机号是否重复注册"""
 
@@ -116,3 +117,58 @@ class RegisterView(View):
 
         # 返回响应
         return JsonResponse({'code': 0, 'errmsg': 'ok'})
+
+class LoginView(View):
+    def post(self,request):
+        """"
+        1 接受参数
+        data = json.loads(request.body.decode())
+        2 提取参数
+        username = data.get('username')
+        password = data.get('password')
+        remembered = data.get('remembered')
+        3 检验参数
+        if not all([username, password]):
+            return JsonResponse({'code':400,'errmsg':"参数不全"})
+        4 认证登录用户
+            # django自带admin后台，admin 可以验证用户名和密码
+            # django 实现了用户名和密码的验证方法。
+            from django.contrib.auth import authentucate, login
+            user = authenticate(username=username, password=password)
+            if user is None:
+                return JsonResponse({'code':400, 'errmsg':"用户名和密码错误"})
+        5 状态保持
+            login(request,user)
+        6 要根据是否记住登录
+            if remembered:
+                 request.session.set_expiry(None)
+            else:
+                request.session.set_expiry(0)
+        7 返回响应
+            return JsonResponse({'code':0, 'errmsg':"OK"})
+        """
+        from django.contrib.auth import authenticate, login
+        data = json.loads(request.body.decode())
+        username = data.get('username')
+        password = data.get('password')
+        remembered = data.get('remembered')
+        # 使用正则进行username的判断，是用户名还是手机号
+        # 如果是手机号，就将USERNAME_FIELD改为mobile  USERNAME_FIELD 规定了根据什么来进行验证。
+        if re.match('1[3-9]\d{9}', username):
+            User.USERNAME_FIELD='mobile'
+        # 如果不是手机号就是用户名，将USERNAME_FIELD设置为username
+        else:
+            User.USERNAME_FIELD='username'
+        if not all([username, password]):
+            return JsonResponse({'code': 400, 'errmsg': '参数不全'})
+
+        user = authenticate(username=username, password=password)
+        if user is None:
+            return JsonResponse({'code': 400, 'errmsg': '用户名或者密码不正确'})
+        # user不为 None 可以进行状态保持。
+        login(request, user)
+        if remembered:
+            request.session.set_expiry(None)
+        else:
+            request.session.set_expiry(0)
+        return JsonResponse({'code': 0, 'errmsg': "OK"})
