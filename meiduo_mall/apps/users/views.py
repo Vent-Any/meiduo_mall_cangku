@@ -158,10 +158,10 @@ class LoginView(View):
             User.USERNAME_FIELD='mobile'
         # 如果不是手机号就是用户名，将USERNAME_FIELD设置为username
         else:
-            User.USERNAME_FIELD='username'
+            User.USERNAME_FIELD ='username'
+        # 验证参数
         if not all([username, password]):
             return JsonResponse({'code': 400, 'errmsg': '参数不全'})
-
         user = authenticate(username=username, password=password)
         if user is None:
             return JsonResponse({'code': 400, 'errmsg': '用户名或者密码不正确'})
@@ -171,4 +171,15 @@ class LoginView(View):
             request.session.set_expiry(None)
         else:
             request.session.set_expiry(0)
-        return JsonResponse({'code': 0, 'errmsg': "OK"})
+        response = JsonResponse({'code': 0, 'errmsg': "OK"})
+        response.set_cookie('username', username, max_age=14*24*3600)
+        return response
+class LogoutView(View):
+    def delete(self, request):
+        # 删除状态保持信息
+        from django.contrib.auth import logout
+        logout(request)
+        # 删除cookie
+        response =  JsonResponse({'code':0, 'errmsg': 'OK'})
+        response.delete_cookie('username')
+        return response
