@@ -53,9 +53,9 @@ class RegisterView(View):
         :return:
         """
         # 1 接受请求
-        body = request.body     # request.body 是byte类型
-        body_str = body.decode()    #  byte转字符串
-        data = json.loads(body_str)  #  字符串转字典
+        body = request.body  # request.body 是byte类型
+        body_str = body.decode()  # byte转字符串
+        data = json.loads(body_str)  # 字符串转字典
         username = data.get('username')
         password = data.get('password')
         password2 = data.get('password2')
@@ -118,8 +118,9 @@ class RegisterView(View):
         # 返回响应
         return JsonResponse({'code': 0, 'errmsg': 'ok'})
 
+
 class LoginView(View):
-    def post(self,request):
+    def post(self, request):
         """"
         1 接受参数
         data = json.loads(request.body.decode())
@@ -155,10 +156,10 @@ class LoginView(View):
         # 使用正则进行username的判断，是用户名还是手机号
         # 如果是手机号，就将USERNAME_FIELD改为mobile  USERNAME_FIELD 规定了根据什么来进行验证。
         if re.match('1[3-9]\d{9}', username):
-            User.USERNAME_FIELD='mobile'
+            User.USERNAME_FIELD = 'mobile'
         # 如果不是手机号就是用户名，将USERNAME_FIELD设置为username
         else:
-            User.USERNAME_FIELD ='username'
+            User.USERNAME_FIELD = 'username'
         # 验证参数
         if not all([username, password]):
             return JsonResponse({'code': 400, 'errmsg': '参数不全'})
@@ -172,14 +173,43 @@ class LoginView(View):
         else:
             request.session.set_expiry(0)
         response = JsonResponse({'code': 0, 'errmsg': "OK"})
-        response.set_cookie('username', username, max_age=14*24*3600)
+        response.set_cookie('username', username, max_age=14 * 24 * 3600)
         return response
+
+
 class LogoutView(View):
     def delete(self, request):
         # 删除状态保持信息
         from django.contrib.auth import logout
         logout(request)
         # 删除cookie
-        response =  JsonResponse({'code':0, 'errmsg': 'OK'})
+        response = JsonResponse({'code': 0, 'errmsg': 'OK'})
         response.delete_cookie('username')
         return response
+
+
+#########################################################################
+from utils.views import LoginRequiredJsonMixin
+
+"""
+LoginRequiredMixin ： 判断用户是否登录
+authenticate：  判断用户名和密码是否正确
+"""
+
+
+# View 直接将dispatch走完了 不会调用LoginRequiredMixin的dispatch
+# 先进性有没有登录的判断。　先执行LoginRequiredMixin 的dispatch
+
+
+class UserInfoView(LoginRequiredJsonMixin, View):
+    def get(self, request):
+        # request 里面有一个user属性,这个user 属性是系统根据我们的Session信息自动帮我们添加的.
+        # 如果我们真的的登录了request.user 就是我们数据库中的那个实例对象
+        user = request.user
+        user_info = {
+            'username': user.username,
+            'mobile': user.mobile,
+            'email': user.email,
+            'email_active': False,
+        }
+        return JsonResponse({'code': 0, 'errmsg': "OK", 'info_data': user_info})
