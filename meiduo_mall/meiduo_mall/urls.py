@@ -47,5 +47,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     path('test/', test),
     path('', include('apps.users.urls')),
-    path('', include('apps.verifications.urls'))
+    path('', include('apps.verifications.urls')),
+    path('', include('apps.oauth.urls')),
 ]

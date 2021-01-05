@@ -213,3 +213,4 @@ class UserInfoView(LoginRequiredJsonMixin, View):
             'email_active': False,
         }
         return JsonResponse({'code': 0, 'errmsg': "OK", 'info_data': user_info})
+
