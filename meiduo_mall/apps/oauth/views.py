@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 from QQLoginTool.QQtool import OAuthQQ
-
+from apps.oauth.models import OAuthQQUser
 # Create your views here.
 from django.views import View
 
@@ -32,11 +32,10 @@ class QQUserView(View):
         access_token = qq.get_access_token(code)
         # 通过access_token 换取openid
         openid = qq.get_open_id(access_token)
-
-        from apps.oauth.models import OAuthQQUser
         try:
             qquser = OAuthQQUser.objects.get(openid=openid)
-        except OAuthQQUser.DoesNotExit:
+
+        except OAuthQQUser.DoesNotExist:
             return JsonResponse({'code': 300, 'access_token': openid})
             pass
         else:
