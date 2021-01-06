@@ -25,7 +25,7 @@ SECRET_KEY = '0j8%k@k0@%d#-62i!x38+dlg)pg(m5a36q!#invbxrwy(gxh__'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [ 'www.meiduo.site','127.0.0.1']
+ALLOWED_HOSTS = [ 'www.meiduo.site', '127.0.0.1']
 
 
 # Application definition
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'apps.verifications',
     'apps.oauth',
+    'apps.areas',
 ]
 
 MIDDLEWARE = [
@@ -206,3 +207,14 @@ CORS_ORIGIN_WHITELIST = (
     'http://www.meiduo.site:8000'
 )
 CORS_ALLOW_CREDENTIALS = True  # 允许携带cookie
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.163.com'
+EMAIL_PORT = 25
+# 发送邮件的邮箱
+EMAIL_HOST_USER = 'qi_rui_hua@163.com'
+# 在邮箱中设置的客户端授权密码
+EMAIL_HOST_PASSWORD = '123456abc'
+# 收件人看到的发件人
+EMAIL_FROM = '美多商城<qi_rui_hua@163.com>'
+EMAIL_VERIFY_URL = 'http://www.meiduo.site:8080/success_verify_email.html'

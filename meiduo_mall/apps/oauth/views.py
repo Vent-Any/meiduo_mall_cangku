@@ -4,6 +4,7 @@ from QQLoginTool.QQtool import OAuthQQ
 from apps.oauth.models import OAuthQQUser
 # Create your views here.
 from django.views import View
+import json
 
 
 class QQUserView(View):
@@ -45,3 +46,42 @@ class QQUserView(View):
             response = JsonResponse({'code': 0, 'errmsg': "OK"})
             response.set_cookie('username', qquser.user.username, max_age=14 * 24 * 3600)
             return response
+
+    def post(self, request):
+        # 接受请求
+        data = json.loads(request.body.decode())
+        # 获取参数
+        mobile = data.get('mobile')
+        password = data.get('password')
+        sms_code = data.get('sms_code')
+        openid = data.get('access_token')
+        # 验证参数
+        # 1 必须都有值
+        # 2 手机号是否规则
+        # 3 验证码是否规则
+        # 4 短信验证码是否符合
+        # 根据手机号判断用户信息
+        from apps.users.models import User
+        try:
+            user = User.objects.get(mobile=mobile)
+        except User.DoesNotExist:
+            # 如果没有查询到,新增信息
+            user = User.objects.create_user(username=mobile,
+                                            mobile=mobile,
+                                            password=password)
+        else:
+            if not user.check_password(password):
+                return JsonResponse({'code': 0, 'errmsg': "绑定失败"})
+        # 查到了,进行绑定
+        from apps.oauth.models import OAuthQQUser
+        OAuthQQUser.objects.create(openid=openid, user=user)
+        # 状态保持
+        from django.contrib.auth import login
+        login(request, user)
+        # 设置cookie
+        response = JsonResponse({'code': 0, 'errmsg': 'Ok'})
+        response.set_cookie('username', user.username, max_age=14 * 24 * 3600)
+        # 返回响应
+        return response
+
+

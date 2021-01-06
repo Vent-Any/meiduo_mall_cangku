@@ -10,6 +10,8 @@ import json
 from django import http
 import re
 
+from apps.users.utils import generate_verify_email_url, check_verify_email_token
+
 
 class UsernameCountView(View):
     """判断用户名是否重复注册"""
@@ -210,7 +212,71 @@ class UserInfoView(LoginRequiredJsonMixin, View):
             'username': user.username,
             'mobile': user.mobile,
             'email': user.email,
-            'email_active': False,
+            'email_active': user.email_active,
         }
         return JsonResponse({'code': 0, 'errmsg': "OK", 'info_data': user_info})
 
+
+class EmailView(View):
+    """添加邮箱"""
+
+    def put(self, request):
+        """实现添加邮箱逻辑"""
+        # 接收参数
+        json_dict = json.loads(request.body.decode())
+        email = json_dict.get('email')
+
+        # 校验参数
+        if not email:
+            return http.JsonResponse({'code': 400,
+                                      'errmsg': '缺少email参数'})
+        if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+            return http.JsonResponse({'code': 400,
+                                      'errmsg': '参数email有误'})
+
+        # django发送邮件服务器设置
+        # 发送激活邮件
+        # from django.core.mail import send_mail
+        # subject = '主题'
+        # message = ''
+        # from_email = '美多商城<qi_rui_hua@163.com>'
+        # recipient_list = [email]
+        # html_message = '<a href="#">点击激活</a>'
+        # send_mail(
+        #     subject,
+        #     message,
+        #     from_email,
+        #     recipient_list,
+        #     html_message,
+        #  )
+        from celery_tasks.email.tasks import send_verify_email
+        verify_url = generate_verify_email_url(request.user)
+        send_verify_email.delay(email, verify_url)
+        # 赋值email字段
+        user = request.user
+        user.email = email
+        user.save()
+        # 响应添加邮箱结果
+        return http.JsonResponse({'code': 0, 'errmsg': '添加邮箱成功'})
+
+
+class VerifyEmailView(View):
+    def put(self, request):
+        # - 1.接收 token
+        token = request.GET.get('token')
+        if not token:
+            return JsonResponse({'code': 400, 'errmsg': 'token缺少'})
+
+        # - 2.解密
+
+        data_dict = check_verify_email_token(token)
+
+        # - 4.去数据库对比 user_id,email
+        try:
+            user = User.objects.get(id = data_dict)
+        except:
+            return JsonResponse({'code': 400, 'errmsg': '参数有误!'})
+        # - 5.修改激活状态
+        user.email_active = True
+        user.save()
+        return JsonResponse({'code': 0, 'errmsg': 'ok'})

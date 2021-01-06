@@ -5,6 +5,8 @@
     虚拟环境下 celery -A celery实例对象的文件路径 worker -l  INFO
 """
 from celery import Celery
+import os
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "meiduo_mall.settings")
 # 1 、创建实例
 # celery 的第一个参数main其实就是一个名字
 # 名字一般使用任务的名字（没有什么作用。）
@@ -18,4 +20,4 @@ app = Celery(main='meiduo')
 app.config_from_object('celery_tasks.config')
 
 # app.autodiscover_tasks([])   tasks 是列表。
-app.autodiscover_tasks(['celery_tasks.sms'])
+app.autodiscover_tasks(['celery_tasks.sms', 'celery_tasks.email'])
