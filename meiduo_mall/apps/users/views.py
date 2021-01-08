@@ -283,41 +283,34 @@ class VerifyEmailView(View):
 
 
 class CreateAddressView(LoginRequiredJsonMixin, View):
-    """新增地址"""
 
-    def post(self, request):
-        """实现新增地址逻辑"""
-        # # 判断是否超过地址上限：最多20个
-        # # Address.objects.filter(user=request.user).count()
-        # count = request.user.addresses.count()
-        # if count >= constants.USER_ADDRESS_COUNTS_LIMIT:
-        #     return http.JsonResponse({'code': RETCODE.THROTTLINGERR, 'errmsg': '超过地址数量上限'})
+    def post(self,request):
+        """
+        1. 必须是登录用户才可以新增地址
+        2. 接收参数
+        3. 提取参数
+        4. 验证参数 (省略--作业)
+        5. 数据入库
+        6. 返回响应
+        :param request:
+        :return:
+        """
+        # 1. 必须是登录用户才可以新增地址   LoginRequiredJSONMixin
+        # 2. 接收参数
+        data = json.loads(request.body.decode())
 
-        # 接收参数
-        json_dict = json.loads(request.body.decode())
-        receiver = json_dict.get('receiver')
-        province_id = json_dict.get('province_id')
-        city_id = json_dict.get('city_id')
-        district_id = json_dict.get('district_id')
-        place = json_dict.get('place')
-        mobile = json_dict.get('mobile')
-        tel = json_dict.get('tel')
-        email = json_dict.get('email')
+        # 3. 提取参数(课件copy)
+        receiver = data.get('receiver')
+        province_id = data.get('province_id')
+        city_id = data.get('city_id')
+        district_id = data.get('district_id')
+        place = data.get('place')
+        mobile = data.get('mobile')
+        tel = data.get('tel')
+        email = data.get('email')
 
-        # 校验参数
-        if not all([receiver, province_id, city_id, district_id, place, mobile]):
-            return http.HttpResponseBadRequest('缺少必传参数')
-        if not re.match(r'^1[3-9]\d{9}$', mobile):
-            return http.HttpResponseBadRequest('参数mobile有误')
-        if tel:
-            if not re.match(r'^(0[0-9]{2,3}-)?([2-9][0-9]{6,7})+(-[0-9]{1,4})?$', tel):
-                return http.HttpResponseBadRequest('参数tel有误')
-        if email:
-            if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
-                return http.HttpResponseBadRequest('参数email有误')
-
-        # 保存地址信息
-
+        # 4. 验证参数 (省略--作业)
+        # 5. 数据入库
         address = Address.objects.create(
             user=request.user,
             title=receiver,
@@ -330,16 +323,10 @@ class CreateAddressView(LoginRequiredJsonMixin, View):
             tel=tel,
             email=email
         )
-
-        # 设置默认地址
-        if not request.user.default_address:
-            request.user.default_address = address
-            request.user.save()
-
-        # 新增地址成功，将新增的地址响应给前端实现局部刷新
+        # 6. 返回响应
         address_dict = {
-            "id": address.id,
-            "title": address.title,
+            'id':address.id,
+             "title": address.title,
             "receiver": address.receiver,
             "province": address.province.name,
             "city": address.city.name,
@@ -350,5 +337,40 @@ class CreateAddressView(LoginRequiredJsonMixin, View):
             "email": address.email
         }
 
-        # 响应保存结果
-        return JsonResponse({'code': 0, 'errmsg': '新增地址成功', 'address': address_dict})
+        return JsonResponse({'code':0,'errmsg':'ok','address': address_dict})
+
+
+    #######################
+class AddressesListView(View):
+    def get(self, request):
+        """
+        1 必须是登录用户可以获取地址
+
+        :param request:
+        :return:
+        """
+        addresses = Address.objects.filter(user=request.user, is_deleted=False)
+        # 创建空的列表
+        address_dict_list = []
+        # 遍历
+        for address in addresses:
+            address_dict = {
+                "id": address.id,
+                "title": address.title,
+                "receiver": address.receiver,
+                "province": address.province.name,
+                "city": address.city.name,
+                "district": address.district.name,
+                "place": address.place,
+                "mobile": address.mobile,
+                "tel": address.tel,
+                "email": address.email
+            }
+            address_dict_list.append(address_dict)
+
+        default_id = request.user.default_address_id
+
+        return JsonResponse({'code': 0,
+                             'errmsg': 'ok',
+                             'addresses': address_dict_list,
+                             'default_address_id': default_id})
