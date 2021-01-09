@@ -148,3 +148,30 @@ class DetailView(View):
 
         # 7. 返回响应
         return render(request, 'detail.html', context)
+
+
+class CategoryVisitView(View):
+    def post(self,  request, category_id):
+        """
+        1 获取分类id
+        2 查询分类数据
+        3 我们查询数据库是否存在分类和日期的记录
+        4 不存在新增
+        5 存在修改
+        """
+
+        try:
+            category = GoodsCategory.objects.get(id=category_id)
+        except:
+            return JsonResponse({'code': 400, 'errmsg': "没有此分类"})
+        from datetime import date
+        today = date.today()
+        from apps.goods.models import GoodsVisitCount
+        try:
+            gvc = GoodsVisitCount.objects.get(category=category, date=today)
+        except:
+            GoodsVisitCount.objects.create(category=category, date = today, count = 1)
+        else:
+            gvc.count += 1
+            gvc.save()
+        return JsonResponse({'code':0 ,'errmsg':'OK'})
