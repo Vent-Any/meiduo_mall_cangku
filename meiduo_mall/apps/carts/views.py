@@ -144,3 +144,5 @@ class CartsView(LoginRequiredJsonMixin, View):
         redis_cli.srem('selected_%s' % user.id, sku_id)
         # 返回响应
         return JsonResponse({'code': 0, 'errmsg': "OK"})
+
+
