@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'apps.contents',
     'apps.goods',
     'django_crontab',
+    'apps.carts',
 ]
 
 MIDDLEWARE = [
@@ -151,6 +152,13 @@ CACHES = {
     "history": {  # 用户的浏览记录
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/3",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    "carts": {  # 用户的浏览记录
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/4",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }

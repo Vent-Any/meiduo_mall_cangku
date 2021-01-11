@@ -285,7 +285,7 @@ class VerifyEmailView(View):
 
 class CreateAddressView(LoginRequiredJsonMixin, View):
 
-    def post(self,request):
+    def post(self, request):
         """
         1. 必须是登录用户才可以新增地址
         2. 接收参数
@@ -326,8 +326,8 @@ class CreateAddressView(LoginRequiredJsonMixin, View):
         )
         # 6. 返回响应
         address_dict = {
-            'id':address.id,
-             "title": address.title,
+            'id': address.id,
+            "title": address.title,
             "receiver": address.receiver,
             "province": address.province.name,
             "city": address.city.name,
@@ -338,10 +338,11 @@ class CreateAddressView(LoginRequiredJsonMixin, View):
             "email": address.email
         }
 
-        return JsonResponse({'code':0,'errmsg':'ok','address': address_dict})
-
+        return JsonResponse({'code': 0, 'errmsg': 'ok', 'address': address_dict})
 
     #######################
+
+
 class AddressesListView(View):
     def get(self, request):
         """
@@ -376,6 +377,7 @@ class AddressesListView(View):
                              'addresses': address_dict_list,
                              'default_address_id': default_id})
 
+
 class UserHistoryView(LoginRequiredJsonMixin, View):
     def post(self, request):
         data = json.loads(request.body.decode())
@@ -383,7 +385,7 @@ class UserHistoryView(LoginRequiredJsonMixin, View):
         try:
             SKU.objects.get(id=sku_id)
         except:
-            return JsonResponse({'code': 400, 'errmsg':'没有商品'})
+            return JsonResponse({'code': 400, 'errmsg': '没有商品'})
         redis_cli = get_redis_connection('history')
         redis_cli.lrem(request.user.id, 0, sku_id)
         redis_cli.lpush(request.user.id, sku_id)
@@ -396,15 +398,15 @@ class UserHistoryView(LoginRequiredJsonMixin, View):
         redis_conn = get_redis_connection('history')
         sku_ids = redis_conn.lrange(request.user.id, 0, -1)
 
-        # 根据sku_ids列表数据，查询出商品sku信息
+        # 根据sku_ids列表数据，查询出商品sku信息 遍历数据进行数据转换
         skus = []
         for sku_id in sku_ids:
             sku = SKU.objects.get(id=sku_id)
             skus.append({
                 'id': sku.id,
                 'name': sku.name,
-                'default_image_url': sku.default_image.url,
+                'default_image_url': sku.default_image.url,    # 调用自定义存储类的url属性
                 'price': sku.price
             })
-
+        # 　返回响应
         return JsonResponse({'code': 0, 'errmsg': 'OK', 'skus': skus})
