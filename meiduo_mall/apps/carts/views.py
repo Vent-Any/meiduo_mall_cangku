@@ -90,3 +90,57 @@ class CartsView(LoginRequiredJsonMixin, View):
             })
         # 7. 返回响应
         return JsonResponse({'code': 0, 'cart_skus': carts_sku, 'errmsg': 'ok'})
+
+    def put(self, request):
+        # 获取用户信息
+        user = request.user
+        # 接受请求
+        data = json.loads(request.body.decode())
+        # 获取数据
+        sku_id = data.get('sku_id')
+        count = data.get('count')
+        selected = data.get('selected')
+        # 验证数据
+        try:
+            sku = SKU.objects.get(id=sku_id)
+        except:
+            return JsonResponse({'code': 400, 'errmsg': "没有此商品"})
+        # 连接数据库
+        redis_cli = get_redis_connection('carts')
+        redis_cli.hset('carts_%s' % user.id, sku_id, count)
+        if selected:
+            redis_cli.sadd('selected_%s' % user.id, sku_id)
+        else:
+            redis_cli.srem('selected_%s' % user.id, sku_id)
+        # 返回响应  为了和前端数据保持一致
+
+        cart_sku = {
+            'id': sku.id,
+            'name': sku.name,
+            'price': sku.price,
+            'count': count,  # 购物车数量   记得类型转换
+            'selected': selected,  # 选中状态   通过程序判断
+            'amount': sku.price * count  # 当前购物车中 数量*单价的 总价
+
+        }
+        return JsonResponse({'code': 0, 'errmsg': "OK", 'cart_sku': cart_sku})
+
+    def delete(self, request):
+        # 获取用户信息
+        user = request.user
+        # 接受参数
+        data = json.loads(request.body.decode())
+        # 提取数据
+        sku_id = data.get('sku_id')
+        # 验证参数
+        try:
+            sku = SKU.objects.get(id=sku_id)
+        except:
+            return JsonResponse({'code': 400, 'errmsg': "没有此商品"})
+        # 链接数据库
+        redis_cli = get_redis_connection('carts')
+        # 删除数据
+        redis_cli.hdel('carts_%s' % user.id, sku_id)
+        redis_cli.srem('selected_%s' % user.id, sku_id)
+        # 返回响应
+        return JsonResponse({'code': 0, 'errmsg': "OK"})
