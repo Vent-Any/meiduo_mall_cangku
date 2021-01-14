@@ -1,8 +1,14 @@
+import os
+
 from django.http import JsonResponse
 from django.shortcuts import render
-
+from alipay import AliPay
+from alipay.utils import AliPayConfig
 # Create your views here.
 from django.views import View
+
+from apps.payment.models import Payment
+from meiduo_mall import settings
 from utils.views import LoginRequiredJsonMixin
 from apps.orders.models import OrderInfo
 
@@ -33,8 +39,6 @@ class PayURLView(LoginRequiredJsonMixin,View):
 
         # https://github.com/fzlee/alipay/blob/master/README.zh-hans.md
         # 3. 创建支付宝 支付对象
-        from alipay import AliPay
-        from alipay.utils import AliPayConfig
         # 3.1 通过文件的形式 来 读取 美多私钥  和 支付宝 公钥
         # 我们最好设置一个相对路径,把相对路径的配置 放到 settings.py中
         from meiduo_mall import settings
@@ -68,3 +72,25 @@ class PayURLView(LoginRequiredJsonMixin,View):
 
         # 6. 返回支付url
         return JsonResponse({'code':0,'alipay_url':alipay_url})
+
+class PaycommitView(View):
+    """保存订单支付结果"""
+
+    def put(self, request):
+        # 获取前端传入的请求参数
+        data = request.GET
+        # 读取order_id
+        out_trade_no = data.get('out_trade_no')
+        # 读取支付宝流水号
+        trade_no = data.get('trade_no')
+        # 保存Payment模型类数据
+        Payment.objects.create(
+            order_id=out_trade_no,
+            trade_id=trade_no
+        )
+
+        # 修改订单状态为待评价
+        OrderInfo.objects.filter(order_id=out_trade_no, status=OrderInfo.ORDER_STATUS_ENUM['UNPAID']).update(
+            status=OrderInfo.ORDER_STATUS_ENUM["UNCOMMENT"])
+        # 响应trade_id
+        return JsonResponse({'code': 0, 'errmsg': 'OK', 'trade_id': trade_no})
