@@ -35,16 +35,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'apps.users',
+    'django_crontab',
     'corsheaders',
+    'apps.users',
     'apps.verifications',
     'apps.oauth',
     'apps.areas',
     'apps.contents',
     'apps.goods',
-    'django_crontab',
     'apps.carts',
     'apps.orders',
+    'apps.payment',
 ]
 
 MIDDLEWARE = [
@@ -240,3 +241,10 @@ CRONJOBS = [
     ('*/1 * * * *', 'apps.contents.crons.generate_static_index_html', '>> ' + os.path.join(BASE_DIR, 'logs/crontab.log'))
 ]
 CRONTAB_COMMAND_PREFIX = 'LANG_ALL=zh_cn.UTF-8'
+
+ALIPAY_APPID = '2021000116697260'
+ALIPAY_DEBUG = True
+ALIPAY_URL = 'https://openapi.alipaydev.com/gateway.do'
+ALIPAY_RETURN_URL = 'http://www.meiduo.site:8080/pay_success.html'
+APP_PRIVATE_KEY_PATH = os.path.join(BASE_DIR, 'apps/payment/key/app_private_key.pem')
+ALIPAY_PUBLIC_KEY_PATH = os.path.join(BASE_DIR, 'apps/payment/key/app_public_key.pem')
