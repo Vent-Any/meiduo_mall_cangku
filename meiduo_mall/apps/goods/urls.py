@@ -6,4 +6,5 @@ urlpatterns = [
     path('hot/<category_id>/', HotView.as_view()),
     path('detail/<sku_id>/', DetailView.as_view()),
     path('detail/visit/<category_id>/', CategoryVisitView.as_view()),
+    path('search/', MeiduoSearchView()),
 ]

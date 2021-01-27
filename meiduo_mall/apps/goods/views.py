@@ -151,7 +151,7 @@ class DetailView(View):
 
 
 class CategoryVisitView(View):
-    def post(self,  request, category_id):
+    def post(self, request, category_id):
         """
         1 获取分类id
         2 查询分类数据
@@ -170,8 +170,32 @@ class CategoryVisitView(View):
         try:
             gvc = GoodsVisitCount.objects.get(category=category, date=today)
         except:
-            GoodsVisitCount.objects.create(category=category, date = today, count = 1)
+            GoodsVisitCount.objects.create(category=category, date=today, count=1)
         else:
             gvc.count += 1
             gvc.save()
-        return JsonResponse({'code':0 ,'errmsg':'OK'})
+        return JsonResponse({'code': 0, 'errmsg': 'OK'})
+
+
+from haystack.views import SearchView
+
+
+class MeiduoSearchView(SearchView):
+    def create_response(self):
+        # haystack 会接受请求帮助我们对接es
+        # 这个时候数据已经获取到了
+        context = self.get_context()
+        page = context.get('page')
+        object_list = page.object_list
+        data_list = []
+        for item in object_list:
+            data_list.append({
+                'id': item.object.id,
+                'name': item.object.name,
+                'price': item.object.price,
+                'default_image_url':item.object.default_image.url,
+                'searchkey': context.get('query'),
+                "page_size": context.get('paginator').num_pages,
+                "count": context.get('paginator').count
+            })
+        return JsonResponse(data_list, safe=False)
