@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_jwt.views import obtain_jwt_token
-from apps.meiduo_admin.views import home, users, image,sku
+from apps.meiduo_admin.views import home, users, image, sku, permission
 from . import login
 urlpatterns = [
     path('authorizations/', login.admin_obtain_token),
@@ -20,4 +20,8 @@ urlpatterns += router.urls
 
 #####################################################
 router.register('skus',sku.SKUModelSetView,basename='skus')
+urlpatterns += router.urls
+
+#####################################################
+router.register('permission/perms',permission.PermissionModelView,basename='permission')
 urlpatterns += router.urls
