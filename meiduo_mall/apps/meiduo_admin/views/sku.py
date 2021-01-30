@@ -4,13 +4,17 @@ from apps.goods.models import SKU
 from apps.meiduo_admin.serializer import sku
 from apps.meiduo_admin.serializer.sku import GoodCategoryModelSerializer
 from apps.meiduo_admin.utils import PageNumber
-
+from rest_framework.permissions import DjangoModelPermissions
 
 class SKUModelSetView(ModelViewSet):
     queryset = SKU.objects.all()
     serializer_class = sku.SKUModelSerializer
     pagination_class = PageNumber
 
+    permission_classes = [
+        # 设置权限
+        DjangoModelPermissions
+    ]
 
 from apps.goods.models import GoodsCategory
 from rest_framework.views import APIView

@@ -14,6 +14,7 @@ urlpatterns = [
     path('goods/<spu_id>/specs/',sku.GoodsSpecAPIView.as_view()),
     path('permission/content_types/',permission.ContenTypeListAPIView.as_view()),
     path('permission/simple/',group.PermissionSimpleModelView.as_view()),
+    path('permission/groups/simple/',admin.GruoplistModelView.as_view()),
 ]
 from rest_framework.routers import DefaultRouter
 router =DefaultRouter()

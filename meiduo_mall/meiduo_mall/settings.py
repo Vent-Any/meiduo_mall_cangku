@@ -24,7 +24,7 @@ SECRET_KEY = '0j8%k@k0@%d#-62i!x38+dlg)pg(m5a36q!#invbxrwy(gxh__'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = ['www.meiduo.site', '127.0.0.1','192.168.108.155' ]
+ALLOWED_HOSTS = ['www.meiduo.site', '127.0.0.1', '192.168.108.155']
 
 # Application definition
 
@@ -244,7 +244,8 @@ DEFAULT_FILE_STORAGE = 'utils.storage.QiniuStorage'
 CRONJOBS = [
     # 每1分钟生成一次首页静态文件
     (
-    '*/1 * * * *', 'apps.contents.crons.generate_static_index_html', '>> ' + os.path.join(BASE_DIR, 'logs/crontab.log'))
+        '*/1 * * * *', 'apps.contents.crons.generate_static_index_html',
+        '>> ' + os.path.join(BASE_DIR, 'logs/crontab.log'))
 ]
 CRONTAB_COMMAND_PREFIX = 'LANG_ALL=zh_cn.UTF-8'
 
@@ -269,31 +270,32 @@ HAYSTACK_SEARCH_RESULTS_PER_PAGE = 5
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         # 'rest_framework.permissions.IsAuthenticated',  # 必须是登录用户
+        # 'rest_framework.permissions.DjangoModelPermissions'  # 权限设置
     ),
     # 认证
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',  # JWT验证
-        'rest_framework.authentication.SessionAuthentication',          #　session认证
-        'rest_framework.authentication.BasicAuthentication',            # 测试认证
+        'rest_framework.authentication.SessionAuthentication',  # session认证
+        'rest_framework.authentication.BasicAuthentication',  # 测试认证
     ),
 }
 
 ############################################################################################
 JWT_AUTH = {
     'JWT_ENCODE_HANDLER':
-    'rest_framework_jwt.utils.jwt_encode_handler',
+        'rest_framework_jwt.utils.jwt_encode_handler',
 
     'JWT_DECODE_HANDLER':
-    'rest_framework_jwt.utils.jwt_decode_handler',
+        'rest_framework_jwt.utils.jwt_decode_handler',
 
     'JWT_PAYLOAD_HANDLER':
-    'rest_framework_jwt.utils.jwt_payload_handler',
+        'rest_framework_jwt.utils.jwt_payload_handler',
 
     'JWT_PAYLOAD_GET_USER_ID_HANDLER':
-    'rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler',
+        'rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler',
 
     'JWT_RESPONSE_PAYLOAD_HANDLER':
-    'apps.meiduo_admin.utils.jwt_response_payload_handler',
+        'apps.meiduo_admin.utils.jwt_response_payload_handler',
 
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),   # 设置token到期时间
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),  # 设置token到期时间
 }
