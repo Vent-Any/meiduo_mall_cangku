@@ -91,7 +91,7 @@ DATABASES = {
         'PORT': 3306,  # 数据库端口
         'USER': 'root',  # 数据库用户名
         'PASSWORD': 'mysql',  # 数据库用户密码
-        'NAME': 'meiduo_mall_44'  # 数据库名字
+        'NAME': 'meiduo_mail_44'  # 数据库名字
     }
 }
 

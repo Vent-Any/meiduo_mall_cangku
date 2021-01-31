@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_jwt.views import obtain_jwt_token
-from apps.meiduo_admin.views import home, users, image, sku, permission, group, admin
+from apps.meiduo_admin.views import home, users, image, sku, permission, group, admin,orders
 from . import login
 urlpatterns = [
     path('authorizations/', login.admin_obtain_token),
@@ -12,6 +12,7 @@ urlpatterns = [
     path('skus/categories/',sku.GoodsCategoryApiView.as_view()),
     path('goods/simple/',sku.SimpleListView.as_view()),
     path('goods/<spu_id>/specs/',sku.GoodsSpecAPIView.as_view()),
+    path('orders/', orders.OrderListAPIView.as_view()),
     path('permission/content_types/',permission.ContenTypeListAPIView.as_view()),
     path('permission/simple/',group.PermissionSimpleModelView.as_view()),
     path('permission/groups/simple/',admin.GruoplistModelView.as_view()),
